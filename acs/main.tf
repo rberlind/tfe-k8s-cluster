@@ -2,27 +2,8 @@ terraform {
   required_version = ">= 0.10.1"
 }
 
-module "ssh_key" {
-  source = "github.com/hashicorp-modules/ssh-keypair-data.git"
-  private_key_filename = "${var.private_key_filename}"
-}
-
-resource "null_resource" "save_ssh_keys" {
-  provisioner "local-exec" {
-    command = "echo \"${chomp(module.ssh_key.private_key_pem)}\" > ${var.private_key_filename}"
-  }
-
-  provisioner "local-exec" {
-    command = "chmod 600 ${var.private_key_filename}"
-  }
-
-  provisioner "local-exec" {
-    command = "echo \"${chomp(module.ssh_key.public_key_data)}\" > ${var.public_key_openssh_filename}"
-  }
-
-  provisioner "local-exec" {
-    command = "chmod 600 ${var.public_key_openssh_filename}"
-  }
+resource "tls_private_key" "ssh_key" {
+  algorithm = "RSA"
 }
 
 provider "azurerm" {
@@ -53,7 +34,7 @@ resource "azurerm_container_service" "k8sexample" {
   linux_profile {
     admin_username = "${var.admin_user}"
     ssh_key {
-      key_data = "${chomp(module.ssh_key.public_key_data)}"
+      key_data = "${chomp(tls_private_key.ssh_key.public_key_openssh)}"
     }
   }
 

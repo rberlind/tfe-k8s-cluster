@@ -5,7 +5,7 @@ variable "gcp_region" {
 
 variable "gcp_zone" {
   description = "GCP zone, e.g. us-east1-b (which must be in gcp_region)"
-  default = "us-east1-c"
+  default = "us-east1-b"
 }
 
 variable "gcp_project" {
