@@ -1,13 +1,3 @@
-variable "private_key_filename" {
-  default     = "private_key.pem"
-  description = "Name of the SSH private key in PEM format"
-}
-
-variable "public_key_openssh_filename" {
-  default     = "public_key_openssh"
-  description = "Name of the SSH public key in OpenSSH format"
-}
-
 variable "azure_subscription_id" {
   description = "Azure Subscription ID"
 }
