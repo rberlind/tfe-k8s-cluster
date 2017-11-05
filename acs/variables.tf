@@ -39,7 +39,7 @@ variable "master_vm_count" {
 
 variable "vm_size" {
   description = "Azure VM type"
-  default = "Standard_A2"
+  default = "Standard_A1"
 }
 
 variable "worker_vm_count" {

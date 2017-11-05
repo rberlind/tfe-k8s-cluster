@@ -31,3 +31,49 @@ resource "google_container_cluster" "k8sexample" {
 
   }
 }
+
+provider "kubernetes" {
+  host = "${google_container_cluster.k8sexample.endpoint}"
+  username = "${var.master_username}"
+  password = "${var.master_password}"
+  client_certificate = "${base64decode(google_container_cluster.k8sexample.master_auth.0.client_certificate)}"
+  client_key = "${base64decode(google_container_cluster.k8sexample.master_auth.0.client_key)}"
+  cluster_ca_certificate = "${base64decode(google_container_cluster.k8sexample.master_auth.0.cluster_ca_certificate)}"
+}
+
+resource "kubernetes_pod" "nginx" {
+  metadata {
+    name = "nginx"
+    labels {
+      App = "nginx"
+    }
+  }
+
+  spec {
+    container {
+      image = "nginx:1.7.8"
+      name  = "nginx"
+
+      port {
+        container_port = 80
+      }
+    }
+  }
+}
+
+resource "kubernetes_service" "nginx" {
+  metadata {
+    name = "nginx"
+  }
+  spec {
+    selector {
+      App = "${kubernetes_pod.nginx.metadata.0.labels.App}"
+    }
+    port {
+      port = 80
+      target_port = 80
+    }
+
+    type = "LoadBalancer"
+  }
+}
