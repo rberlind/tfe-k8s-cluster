@@ -13,3 +13,7 @@ output "acs_agent_pool_fqdn" {
 output "acs_diagnostics_uri" {
   value = "${lookup(azurerm_container_service.k8sexample.diagnostics_profile[0], "storage_uri")}"
 }
+
+output "nginx_ip" {
+  value = "${kubernetes_service.nginx.load_balancer_ingress.0.ip}"
+}
