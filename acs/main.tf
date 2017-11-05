@@ -57,6 +57,10 @@ resource "azurerm_container_service" "k8sexample" {
   tags {
     Environment = "${var.environment}"
   }
+
+  provisioner "local-exec" {
+    command = "sleep 30"
+  }
 }
 
 resource "null_resource" "get_acs_key_and_k8s_config" {
