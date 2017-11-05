@@ -6,16 +6,6 @@ resource "tls_private_key" "ssh_key" {
   algorithm = "RSA"
 }
 
-resource "null_resource" "save_ssh_keys" {
-  provisioner "local-exec" {
-    command = "echo \"${chomp(tls_private_key.ssh_key.private_key_pem)}\" > ${var.private_key_filename}"
-  }
-
-  provisioner "local-exec" {
-    command = "chmod 600 ${var.private_key_filename}"
-  }
-}
-
 provider "azurerm" {
   subscription_id = "${var.azure_subscription_id}"
   tenant_id       = "${var.azure_tenant_id}"
@@ -69,7 +59,16 @@ resource "azurerm_container_service" "k8sexample" {
   }
 }
 
-resource "null_resource" "get_k8s_config" {
+resource "null_resource" "get_acs_key_and_k8s_config" {
+
+  provisioner "local-exec" {
+    command = "echo \"${chomp(tls_private_key.ssh_key.private_key_pem)}\" > ${var.private_key_filename}"
+  }
+
+  provisioner "local-exec" {
+    command = "chmod 600 ${var.private_key_filename}"
+  }
+
   provisioner "local-exec" {
     command = "scp -o StrictHostKeyChecking=no -i ${var.private_key_filename} ${var.admin_user}@${lookup(azurerm_container_service.k8sexample.master_profile[0], "fqdn")}:~/.kube/config config"
   }
