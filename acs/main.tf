@@ -58,3 +58,62 @@ resource "azurerm_container_service" "k8sexample" {
     Environment = "${var.environment}"
   }
 }
+
+resource "null_resource" "get_acs_key_and_k8s_config" {
+
+  provisioner "local-exec" {
+    command = "echo \"${chomp(tls_private_key.ssh_key.private_key_pem)}\" > ${var.private_key_filename}"
+  }
+
+  provisioner "local-exec" {
+    command = "chmod 600 ${var.private_key_filename}"
+  }
+
+  provisioner "local-exec" {
+    command = "scp -o StrictHostKeyChecking=no -i ${var.private_key_filename} ${var.admin_user}@${lookup(azurerm_container_service.k8sexample.master_profile[0], "fqdn")}:~/.kube/config config"
+  }
+}
+
+provider "kubernetes" {
+  host = "${lookup(azurerm_container_service.k8sexample.master_profile[0], "fqdn")}"
+  config_path = "config"
+}
+
+resource "kubernetes_pod" "nginx" {
+  metadata {
+    name = "nginx"
+    labels {
+      App = "nginx"
+    }
+  }
+
+  spec {
+    container {
+      image = "nginx:1.7.8"
+      name  = "nginx"
+
+      port {
+        container_port = 80
+      }
+    }
+  }
+
+  depends_on = ["null_resource.get_acs_key_and_k8s_config"]
+}
+
+resource "kubernetes_service" "nginx" {
+  metadata {
+    name = "nginx"
+  }
+  spec {
+    selector {
+      App = "${kubernetes_pod.nginx.metadata.0.labels.App}"
+    }
+    port {
+      port = 80
+      target_port = 80
+    }
+
+    type = "LoadBalancer"
+  }
+}

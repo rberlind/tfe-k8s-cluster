@@ -1,3 +1,7 @@
+variable "private_key_filename" {
+  default     = "private_key.pem"
+  description = "Name of the SSH private key in PEM format"
+}
 variable "azure_subscription_id" {
   description = "Azure Subscription ID"
 }
