@@ -98,7 +98,7 @@ resource "kubernetes_pod" "nginx" {
     }
   }
 
-  depends_on = ["null_resource.get_k8s_config"]
+  depends_on = ["null_resource.get_acs_key_and_k8s_config"]
 }
 
 resource "kubernetes_service" "nginx" {
