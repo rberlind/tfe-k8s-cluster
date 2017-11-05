@@ -21,3 +21,7 @@ output "k8s_master_auth_client_key" {
 output "k8s_master_auth_cluster_ca_certificate" {
   value = "${google_container_cluster.k8sexample.master_auth.0.cluster_ca_certificate}"
 }
+
+output "nginx_ip" {
+  value = "${kubernetes_service.nginx.load_balancer_ingress.0.ip}"
+}
